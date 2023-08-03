@@ -1,5 +1,5 @@
 use std::cell::Cell;
-use std::sync::atomic::{AtomicU8, Ordering};
+use std::sync::atomic::{AtomicU8, fence, Ordering};
 use std::thread;
 use std::thread::ThreadId;
 use crate::deadlock_detected;
@@ -62,6 +62,8 @@ impl Guard {
     }
 
     pub fn release_lock(&self) {
+        fence(Ordering::Release);
+
         self.guard.swap(UNLOCKED_BIT, Ordering::Release);
     }
 }
