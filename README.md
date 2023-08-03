@@ -17,7 +17,7 @@ high performance, threadsafe stores offering stress-free simple interfaces, copy
 - atomically backed
 - safe & fast locking - no std RwLock
 
-### [RapidSnap - the cell](https://docs.rs/rapidsync/latest/rapidsync/struct.RapidCell.html)
+### [RapidSnap - the cell](https://docs.rs/rapidsync/latest/rapidsync/struct.RapidSnap.html)
 
 ### RapidMap
 the map - coming soon

@@ -32,11 +32,6 @@ pub struct RapidSnap<T> {
     data: UnsafeCell<Arc<T>>,
 }
 
-
-pub struct RapidCell {
-
-}
-
 pub struct RapidMap {
 
 }

@@ -1,6 +1,6 @@
 [package]
 name = "rapidsync"
-version = "0.1.5-alpha1"
+version = "0.1.7-alpha1"
 edition = "2021"
 authors = ["Edward Coristine <edward@packetware.net>"]
 description = "Rapid & threadsafe embedded data stores"
