@@ -1,11 +1,12 @@
 [package]
 name = "rapidsync"
-version = "0.1.1-alpha1"
+version = "0.1.2-alpha1"
 edition = "2021"
 authors = ["Edward Coristine <edward@packetware.net>"]
 description = "Rapid & threadsafe embedded data stores"
-license = "MIT"
+license = "MIT OR Apache-2.0"
 categories = ["sync", "threadsafe", "hashmap"]
+homepage = "botnet.blog"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 

@@ -8,3 +8,11 @@ macro_rules! style_panic {
         panic!("[Rapidsync] A critical error occurred: {}\nPlease report this if it's unintended behavior", format!($($input)*))
     };
 }
+
+/// for detected deadlocks
+#[macro_export]
+macro_rules! deadlock_detected {
+    ($($input:tt)*) => {
+        println!("[Rapidsync] [DEBUG ASSERTIONS] A possible deadlock was detected: {}\nPlease report this if it's unintended behavior", format!($($input)*))
+    };
+}

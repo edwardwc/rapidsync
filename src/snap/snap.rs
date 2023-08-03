@@ -4,6 +4,7 @@ use std::ops::{Deref, DerefMut};
 use std::sync::{Arc};
 use std::sync::atomic::{AtomicU8, Ordering};
 use crate::{RapidSnap, style_panic};
+use crate::tools::guard::Guard;
 use crate::vars::{LOCKED_BIT, UNLOCKED_BIT};
 
 unsafe impl<T> Sync for RapidSnap<T> {}
@@ -13,22 +14,23 @@ impl<T> RapidSnap<T> {
     /// Create a new RapidSnap
     pub fn new(value: T) -> Self {
         RapidSnap {
-            guard: AtomicU8::new(UNLOCKED_BIT),
+            guard: Guard::new(),
             data: UnsafeCell::new(Arc::new(value))
         }
     }
 
-    //
+    /// Read a value (this call is lockless)
     pub fn read(&self) -> Arc<T> {
         return unsafe { (*self).data.get().read().clone() }
     }
 
+    /// Swap the data in the cell
     pub fn swap(&self, new_value: T) -> Arc<T> {
         loop {
-            if self.guard.compare_exchange(UNLOCKED_BIT, LOCKED_BIT, Ordering::Release, Ordering::Acquire).is_ok() {
+            if self.guard.try_acquire_lock() {
                 let val = unsafe { (*self).data.get().replace(Arc::new(new_value)) };
 
-                self.guard.store(UNLOCKED_BIT,Ordering::Release);
+                self.guard.release_lock();
 
                 return val
             }
@@ -37,9 +39,10 @@ impl<T> RapidSnap<T> {
         }
     }
 
-    pub fn get_mut<'a>(&'a self) -> SnapMut<'a, T> {
+    /// Get a mutable reference to the object. This call blocks other mutable references or swaps until the mutable reference is dropped.
+    pub fn get_mut(&self) -> SnapMut<T> {
         loop {
-            if self.guard.compare_exchange(UNLOCKED_BIT, LOCKED_BIT, Ordering::Release, Ordering::Acquire).is_ok() {
+            if self.guard.try_acquire_lock() {
                 return SnapMut {
                     data: &self,
                 }
@@ -52,43 +55,5 @@ impl<T> RapidSnap<T> {
 
 /// A (Rapidsnap) guard for mutable references
 pub struct SnapMut<'a, T> {
-    data: &'a RapidSnap<T>,
+    pub(crate) data: &'a RapidSnap<T>,
 }
-
-impl<'a, T> Deref for SnapMut<'a, T> {
-    type Target = T;
-
-    fn deref(&self) -> &Self::Target {
-        unsafe { &*self.data.data.get() }
-    }
-}
-
-impl<'a, T> DerefMut for SnapMut<'a, T> {
-    fn deref_mut(&mut self) -> &mut Self::Target {
-        match Arc::get_mut(unsafe { &mut *self.data.data.get() }) {
-            Some(t) => t,
-            None => style_panic!("Failed to dereference to mutable reference")
-        }
-    }
-}
-
-impl<'a, T> Drop for SnapMut<'a, T> {
-    fn drop(&mut self) {
-        self.data.guard.store(UNLOCKED_BIT, Ordering::Release)
-    }
-}
-
-/*
-    #[derive(Clone, Debug, Eq, PartialEq)]
-    pub struct Snap<T> {
-        value: Arc<T>
-    }
-
-    impl Snap<T> {
-        pub fn new(value: T) -> Snap<T> {
-            Snap {
-                value: Arc::new(value),
-            }
-        }
-    }
- */
