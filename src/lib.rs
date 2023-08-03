@@ -7,7 +7,7 @@ mod tools;
 use std::cell::UnsafeCell;
 
 use std::sync::{Arc};
-use std::sync::atomic::{AtomicU8};
+
 
 pub use crate::snap::snap::SnapMut;
 use crate::tools::guard::Guard;

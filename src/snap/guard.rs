@@ -1,8 +1,8 @@
 use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
-use std::sync::atomic::Ordering;
-use crate::{RapidSnap, SnapMut, style_panic};
-use crate::vars::UNLOCKED_BIT;
+
+use crate::{SnapMut, style_panic};
+
 
 impl<'a, T> Deref for SnapMut<'a, T> {
     type Target = T;
