@@ -5,7 +5,7 @@ pub static UNLOCKED_BIT: u8 = 1;
 #[macro_export]
 macro_rules! style_panic {
     ($($input:tt)*) => {
-        panic!("[Rapidsync] A critical error occurred: {}\nPlease report this if it's unintended behavior", format!($($input)*))
+        panic!("[Rapidsync] A critical error occurred: {}\nNeed help, or think this is an error? https://github.com/edwardwc/rapidsync/issues", format!($($input)*))
     };
 }
 
@@ -13,6 +13,6 @@ macro_rules! style_panic {
 #[macro_export]
 macro_rules! deadlock_detected {
     ($($input:tt)*) => {
-        println!("[Rapidsync] [DEBUG ASSERTIONS] A possible deadlock was detected: {}\nPlease report this if it's unintended behavior", format!($($input)*))
+        println!("[Rapidsync] [DEBUG ASSERTIONS] A possible deadlock was detected: {}\nIs this inaccurate? Please submit an issue: https://github.com/edwardwc/rapidsync/issues", format!($($input)*))
     };
 }

@@ -44,7 +44,7 @@ impl Guard {
 
                     if t == id {
                         deadlock_detected!("on {:?}", id);
-                        self.notified.replace(true)
+                        self.notified.replace(true);
                     }
                 }
             }
