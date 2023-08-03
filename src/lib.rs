@@ -1,4 +1,3 @@
-mod cell;
 mod vars;
 mod snap;
 mod lock;
