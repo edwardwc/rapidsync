@@ -10,7 +10,7 @@ This library was built because we loved the flexibility of DashMap, but wanted a
 ## Stores
 high performance, threadsafe stores offering stress-free simple interfaces, copy-free reads, fast writes, and mutable references - without having mutable references to the store itself
 ### features
-- locks cannot be poisoned unless you hold a mutable reference and try to write
+- locks cannot be poisoned unless you hold a mutable reference and try to read/write
   - on debug builds, rapidsync automatically notifies you if a deadlock is detected
 - memory safety in all conditions because of fast performance without splitting trees
 - no external dependencies
@@ -23,6 +23,6 @@ high performance, threadsafe stores offering stress-free simple interfaces, copy
 the map - coming soon
 
 ## Notes, gotchas, advice
-- By design, stores cannot be poisoned on reads or writes. the only way a store can be 'poisoned' is you own a mutable reference and try to write to the same object. can be solved by:
+- By design, stores cannot be poisoned on reads or writes. the only way a store can be 'poisoned' is you own a mutable reference and try to read/write to the same object. can be solved by:
   - letting the mutable reference fall out of scope (for most users, this is good)
   - calling rust default function `drop`

@@ -21,7 +21,13 @@ impl<T> RapidSnap<T> {
 
     /// Read a value (this call is lockless)
     pub fn read(&self) -> Arc<T> {
-        unsafe { self.data.get().read().clone() }
+        loop {
+            if self.guard.can_read() {
+                unsafe { self.data.get().read().clone() }
+            }
+
+            hint::spin_loop()
+        }
     }
 
     /// Swap the data in the cell

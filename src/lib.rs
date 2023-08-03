@@ -11,6 +11,7 @@ use std::sync::{Arc};
 pub use crate::snap::snap::SnapMut;
 use crate::tools::guard::Guard;
 
+#[derive(Clone, Debug)]
 /// super high performance, threadsafe cell offering stress-free simple yet flexible interface with interior mutability
 /// - atomically backed
 /// - safe & fast locking (no RWLock)

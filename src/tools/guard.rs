@@ -53,6 +53,14 @@ impl Guard {
         false
     }
 
+    pub fn can_read(&self) -> bool {
+        if self.guard.load(Ordering::Acquire) == UNLOCKED_BIT {
+            return true
+        }
+
+        false
+    }
+
     pub fn release_lock(&self) {
         self.guard.swap(UNLOCKED_BIT, Ordering::Release);
     }
