@@ -8,16 +8,24 @@ use crate::vars::{LOCKED_BIT, UNLOCKED_BIT};
 pub struct Guard {
     // our counter
     pub guard: AtomicU8,
+
     // for debug assertions only, to detect deadlocks
     #[cfg(debug_assertions)]
-    pub locked: Cell<Option<ThreadId>>
+    pub locked: Cell<Option<ThreadId>>,
+
+    // to display notifications
+    #[cfg(debug_assertions)]
+    pub notified: Cell<bool>
 }
 
 impl Guard {
     pub fn new() -> Self {
         Self {
             guard: AtomicU8::new(UNLOCKED_BIT),
+            #[cfg(debug_assertions)]
             locked: Cell::new(None),
+            #[cfg(debug_assertions)]
+            notified: Cell::new(false),
         }
     }
 
@@ -31,8 +39,13 @@ impl Guard {
 
         #[cfg(debug_assertions)] {
             if let Some(t) = self.locked.get() {
-                if t == thread::current().id() {
-                    deadlock_detected!("on thread {:?}", thread::current())
+                if !self.notified.get() {
+                    let id = thread::current().id();
+
+                    if t == id {
+                        deadlock_detected!("on {:?}", id);
+                        self.notified.replace(true)
+                    }
                 }
             }
         }
