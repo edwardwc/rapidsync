@@ -23,7 +23,7 @@ impl<T> RapidSnap<T> {
     pub fn read(&self) -> Arc<T> {
         loop {
             if self.guard.can_read() {
-                unsafe { self.data.get().read().clone() }
+                return unsafe { self.data.get().read().clone() };
             }
 
             hint::spin_loop()
