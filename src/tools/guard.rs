@@ -16,7 +16,7 @@ pub struct Guard {
 impl Guard {
     pub fn new() -> Self {
         Self {
-            guard: AtomicU8::new(0),
+            guard: AtomicU8::new(UNLOCKED_BIT),
             locked: Cell::new(None),
         }
     }
