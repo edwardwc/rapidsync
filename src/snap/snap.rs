@@ -1,7 +1,7 @@
 use std::cell::UnsafeCell;
 use std::hint;
 use std::ops::{Deref, DerefMut};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc};
 use std::sync::atomic::{AtomicU8, Ordering};
 use crate::{RapidSnap, style_panic};
 use crate::vars::{LOCKED_BIT, UNLOCKED_BIT};
@@ -11,7 +11,7 @@ unsafe impl<T> Send for RapidSnap<T> {}
 
 impl<T> RapidSnap<T> {
     /// Create a new RapidSnap
-    pub fn new(value: T) -> RapidSnap<T> {
+    pub fn new(value: T) -> Self {
         RapidSnap {
             guard: AtomicU8::new(UNLOCKED_BIT),
             data: UnsafeCell::new(Arc::new(value))
@@ -20,13 +20,7 @@ impl<T> RapidSnap<T> {
 
     //
     pub fn read(&self) -> Arc<T> {
-        loop {
-            if self.guard.load(Ordering::Acquire) == UNLOCKED_BIT {
-                return unsafe { (*self).data.get().read().clone() }
-            }
-
-            hint::spin_loop()
-        }
+        return unsafe { (*self).data.get().read().clone() }
     }
 
     pub fn swap(&self, new_value: T) -> Arc<T> {
@@ -56,6 +50,7 @@ impl<T> RapidSnap<T> {
     }
 }
 
+/// A (Rapidsnap) guard for mutable references
 pub struct SnapMut<'a, T> {
     data: &'a RapidSnap<T>,
 }
