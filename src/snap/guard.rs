@@ -8,7 +8,9 @@ impl<'a, T> Deref for SnapMut<'a, T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*self.data.data.get() }
+        unsafe {
+            &*(*self).data.data.get()
+        }
     }
 }
 
@@ -23,6 +25,6 @@ impl<'a, T> DerefMut for SnapMut<'a, T> {
 
 impl<'a, T> Drop for SnapMut<'a, T> {
     fn drop(&mut self) {
-        self.data.guard.release_lock()
+        self.data.guard.release_write_lock()
     }
 }

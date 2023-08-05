@@ -1,5 +1,6 @@
 use std::cell::UnsafeCell;
-use std::hint;
+use std::{hint, mem};
+use std::ops::Deref;
 
 use std::sync::{Arc};
 
@@ -12,7 +13,7 @@ unsafe impl<T> Send for RapidSnap<T> {}
 
 impl<T> RapidSnap<T> {
     /// Create a new RapidSnap
-    pub fn new(value: T) -> Self {
+    pub fn new(mut value: T) -> Self {
         RapidSnap {
             guard: Guard::new(),
             data: UnsafeCell::new(Arc::new(value))
@@ -22,8 +23,12 @@ impl<T> RapidSnap<T> {
     /// Read a value (this call is lockless)
     pub fn read(&self) -> Arc<T> {
         loop {
-            if self.guard.can_read() {
-                return unsafe { self.data.get().read().clone() };
+            if self.guard.try_acquire_read() {
+                let val = unsafe { (self.data.get()).as_ref().unwrap() }.clone();
+
+                self.guard.release_read_lock();
+
+                return val
             }
 
             hint::spin_loop()
@@ -31,12 +36,17 @@ impl<T> RapidSnap<T> {
     }
 
     /// Swap the data in the cell
-    pub fn swap(&self, new_value: T) -> Arc<T> {
+    pub fn swap(&self, mut new_value: T) -> Arc<T> {
         loop {
             if self.guard.try_acquire_lock() {
-                let val = unsafe { self.data.get().replace(Arc::new(new_value)) };
+                let val = unsafe {
+                    let var = &mut *self.data.get();
+                    // new_value = mem::forget(new_value);
+                    *var = Arc::new(new_value);
+                    var.clone()
+                };
 
-                self.guard.release_lock();
+                self.guard.release_write_lock();
 
                 return val
             }

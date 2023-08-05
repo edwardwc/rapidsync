@@ -1,6 +1,7 @@
 pub static LOCKED_BIT: u8 = 0;
 pub static UNLOCKED_BIT: u8 = 1;
-// pub static READERS_BIT: u8 = 2;
+pub static READING_BIT: u8 = 2;
+pub static WRITER_WAITING: u8 = 3;
 
 #[macro_export]
 macro_rules! style_panic {
