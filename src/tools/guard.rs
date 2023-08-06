@@ -63,11 +63,12 @@ impl Guard {
     }
 
     pub fn try_acquire_read(&self) -> bool {
-        if self.guard.load(Ordering::Acquire) != WRITER_WAITING
-            || self.guard.compare_exchange(UNLOCKED_BIT, READING_BIT, Ordering::Release, Ordering::Acquire).is_ok() {
-            self.readers.fetch_add(1, Ordering::AcqRel);
+        if self.guard.load(Ordering::Acquire) != WRITER_WAITING {
+            if self.guard.compare_exchange(UNLOCKED_BIT, LOCKED_BIT, Ordering::Release, Ordering::Acquire).is_ok() {
+                // self.readers.fetch_add(1, Ordering::AcqRel);
 
-            return true
+                return true
+            }
         }
 
         false
@@ -75,7 +76,6 @@ impl Guard {
 
     pub fn release_read_lock(&self) {
         if self.guard.fetch_sub(1, Ordering::AcqRel) == 1 { // we're now at zero
-            println!("read totally unlocked");
             self.guard.store(UNLOCKED_BIT, Ordering::Release);
         }
     }
