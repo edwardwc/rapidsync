@@ -7,10 +7,10 @@ use std::sync::{Arc};
 
 use crate::{RapidSnap, style_panic};
 use crate::tools::guard::Guard;
+use crate::tools::snap::SnapRef;
 
-
-unsafe impl<T> Sync for RapidSnap<T> {}
-unsafe impl<T> Send for RapidSnap<T> {}
+unsafe impl<T: Send + Sync + Clone> Sync for RapidSnap<T> {}
+unsafe impl<T: Send + Sync + Clone> Send for RapidSnap<T> {}
 
 impl<T: Send + Sync + Clone> RapidSnap<T> {
     /// Create a new RapidSnap
@@ -22,8 +22,10 @@ impl<T: Send + Sync + Clone> RapidSnap<T> {
     }
 
     /// Read a value (this call is lockless)
-    pub fn read(&self) -> Arc<T> {
-        return (unsafe { &*(*self).data.get() }).clone();
+    pub fn read(&self) -> SnapRef<T> {
+        return SnapRef {
+            data: (unsafe { &*(*self).data.get() }).clone(),
+        }
 /*
         loop {
             if self.guard.try_acquire_read() {
@@ -41,21 +43,23 @@ impl<T: Send + Sync + Clone> RapidSnap<T> {
     }
 
     /// Swap the data in the cell
-    pub fn swap(&self, mut new_value: T) {
+    pub fn swap(&self, mut new_value: T) -> SnapRef<T> {
         loop {
             if self.guard.try_acquire_lock() {
-                unsafe {
-                    let mut foo = match Arc::get_mut(unsafe { &mut *self.data.get() }) {
-                        Some(t) => t,
-                        None => style_panic!("Failed to dereference to write value")
-                    };
-
-                    *foo = new_value;
+                let mut foo = match Arc::get_mut(unsafe { &mut *self.data.get() }) {
+                    Some(t) => t,
+                    None => style_panic!("Failed to dereference to write value")
                 };
+
+                let old_ref = SnapRef {
+                    data: Arc::new((*foo).clone()),
+                };
+
+                *foo = new_value;
 
                 self.guard.release_write_lock();
 
-                return
+                return old_ref
             }
 
             hint::spin_loop()

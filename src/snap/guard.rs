@@ -25,7 +25,6 @@ impl<'a, T> DerefMut for SnapMut<'a, T> {
 
 impl<'a, T> Drop for SnapMut<'a, T> {
     fn drop(&mut self) {
-        println!("release mut write lock");
         self.data.guard.release_write_lock()
     }
 }

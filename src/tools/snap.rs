@@ -1,14 +1,15 @@
 use std::ops::Deref;
 use std::sync::Arc;
 
-pub struct SnapRef<'a, T> {
-    pub data: &'a Arc<T>
+#[derive(Debug)]
+pub struct SnapRef<T> {
+    pub data: Arc<T>
 }
 
-impl<'a, T> Deref for SnapRef<'a, T> {
+impl<T> Deref for SnapRef<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
-        unsafe { &*Arc::as_ptr(self.data) }
+        unsafe { &*Arc::as_ptr(&self.data) }
     }
 }

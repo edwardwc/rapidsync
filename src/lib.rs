@@ -1,16 +1,21 @@
 mod vars;
 mod snap;
-mod lock;
 mod tools;
+mod map;
 
 use std::cell::UnsafeCell;
+use std::collections::hash_map::RandomState;
+use std::collections::HashMap;
+use std::hash::Hash;
 
 use std::sync::{Arc};
+use crate::map::map::RapidMapData;
 
 
 pub use crate::snap::snap::SnapMut;
 use crate::tools::guard::Guard;
 
+#[derive(Debug)]
 /// super high performance, threadsafe cell offering stress-free simple yet flexible interface with interior mutability
 /// - atomically backed
 /// - safe & fast locking (no RWLock)
@@ -31,6 +36,6 @@ pub struct RapidSnap<T> {
     data: UnsafeCell<Arc<T>>,
 }
 
-pub struct RapidMap {
-
+pub struct RapidMap<'a, K: Send + Sync + Clone + Eq + PartialEq + Hash + Sized, V: Send + Sync + Clone + Sized> {
+    map: RapidSnap<RapidMapData<'a, K, V>>
 }

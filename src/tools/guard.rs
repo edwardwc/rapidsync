@@ -5,6 +5,7 @@ use std::thread::ThreadId;
 use crate::deadlock_detected;
 use crate::vars::{LOCKED_BIT, READING_BIT, UNLOCKED_BIT, WRITER_WAITING};
 
+#[derive(Debug)]
 pub struct Guard {
     // our counter
     pub guard: AtomicU8,
