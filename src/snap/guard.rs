@@ -16,7 +16,7 @@ impl<'a, T> Deref for SnapMut<'a, T> {
 
 impl<'a, T> DerefMut for SnapMut<'a, T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
-        match Arc::get_mut(unsafe { &mut *self.data.data.get() }) {
+        match Arc::make_mut(unsafe { &mut *self.data.data.get() }) {
             Some(t) => t,
             None => style_panic!("Failed to dereference to mutable reference")
         }
